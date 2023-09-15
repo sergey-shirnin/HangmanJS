@@ -3,16 +3,19 @@ const input = require('sync-input');
 const options = ['python', 'java', 'swift', 'javascript'];
 const word = options[Math.floor(Math.random() * options.length)];
 
-let guessed = '', char = '', reg = '', masked = '';
-const attempts = 8, mask = '-';
+let attempts = 8, guessed = '', char = '', reg = '', masked = '', msg = '';
+const mask = '-', unique = new Set(word);
 
 console.log('hangman'.toUpperCase().split('').join(' '));
 
-for (i = 0; i < attempts; i++) {
-  reg = RegExp(['[^', guessed, ']'].join(''), 'g');
-  masked = word.replace(reg, mask);
-  char = input(`\n${masked}\nInput a letter: `)
-  word.includes(char) ? guessed += char : console.log('That letter doesn\'t appear in the word.');
-
+while (attempts > 0 & unique.size != guessed.length) {
+  regex = RegExp(['[^', guessed, ']'].join(''), 'g');
+  masked = word.replace(regex, mask);
+  char = input(`\n${masked}\nInput a letter: `);
+  msg = guessed.includes(char) ? 'No improvements.' : 
+    word.includes(char) ? '' : 'That letter doesn\'t appear in the word.';
+  if (msg) { console.log(msg); }
+  msg ? attempts-- : guessed += char;
 }
-console.log('\nThanks for playing!');
+
+console.log(attempts ? `${word}\nYou guessed the word!\nYou survived!` : 'You lost!')
