@@ -1,30 +1,46 @@
-const input = require('sync-input');
+const input = require("sync-input");
 
-const options = ['python', 'java', 'swift', 'javascript'];
-const word = options[Math.floor(Math.random() * options.length)];
-
-let guessed = '', char = '', reg = '', masked = '', msg = '', attempts = 8, mask = '-';
-
-console.log('hangman'.toUpperCase().split('').join(' '));
-
-while (attempts > 0 & new Set(word).size != guessed.length) {
-  regex = RegExp(['[^', guessed, ']'].join(''), 'g');
-  masked = word.replace(regex, mask);
-
-  char = input(`\n${masked}\nInput a letter: `);
-  
-  msg = char.length != 1 ? 'Please, input a single letter.' : 
-    guessed.includes(char) ? 'You\'ve already guessed this letter.' :
-    (/[^a-z]/).test(char) ? 'Please, enter a lowercase letter from the English alphabet.' :
-    word.includes(char) ? '' : 'That letter doesn\'t appear in the word.';
-  
-  if (msg) {
-    console.log(msg);
-  }
-  
-  msg === 'That letter doesn\'t appear in the word.' ? attempts-- : 
-    msg ? guessed += '' : guessed += char;
+const choice = (arr) => arr[Math.floor(Math.random() * arr.length)];
+String.prototype.format = function(...params) { 
+  return this.replace(/{(\d+)}/g, (match, i) => !params[i] ? match : params[i]);
 }
 
-console.log(new Set(word).size == guessed.length ? 
-            `\nYou guessed the word ${word}!\nYou survived!` : 'You lost!')
+const languages = new Array("python", "java", "javascript", "swift");
+const res = new Array("You lost!", "You guessed the word {0}! You survived!"), mask = "-";
+const wrongMsg = 'That letter doesn\'t appear in the word.';
+
+let run = true, wins = 0, fails = 0;
+
+while (run) {
+  console.log("hangman".toUpperCase().split("").join(" "));
+  console.log("Type \"play\" to play the game, \"results\" to show the scoreboard, and \"exit\" to quit");  
+  switch (input(">> ")) {
+    case "play":
+      const word = choice(languages), wordUniqueLetters = new Set(word);
+      const wrongTry = (char) => { triedLetters += char; attempts--; }
+      let guessedLetters = "", triedLetters = "", attempts = 8;
+      
+      while (!!attempts && wordUniqueLetters.size != guessedLetters.length) {
+        console.log(`\n${word.replace(RegExp(`[^${guessedLetters}]`, "g"), mask)}`);
+        
+        const char = input("Input a letter >> ");
+    
+        const msg = /^\w{2,}/.test(char) || !char.trim() ? "Please, input a single letter."  
+          : "".concat(guessedLetters, triedLetters).includes(char) ? "You've already guessed this letter."
+          : /[^a-z]/.test(char) ? "Please, enter a lowercase letter from the English alphabet"
+          : !word.includes(char) ? wrongMsg : null
+      
+        msg ? console.log(msg) : guessedLetters += char; msg === wrongMsg && wrongTry(char);
+      }
+
+      attempts ? wins++ : fails++; 
+      console.log(`\n${res[+!!attempts].format(word)}`); break;
+      
+    case "results":
+      console.log(`\nYou won: ${wins} times.\nYou lost: ${fails} times.\n`); break;
+    case "exit":
+      run = false; break;
+    default:
+      console.log("unknown command try again...\n");
+  }
+}
