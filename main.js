@@ -9,10 +9,11 @@ const languages = new Array("python", "java", "javascript", "swift");
 const res = new Array("You lost!", "You guessed the word {0}! You survived!"), mask = "-";
 const wrongMsg = 'That letter doesn\'t appear in the word.';
 
-let run = true, wins = 0, fails = 0;
+let run = true, wins = 0, fails = 0; 
+let msg;
 
 while (run) {
-  console.log("hangman".toUpperCase().split("").join(" "));
+  console.log([..."hangman".toUpperCase()].join(" "));
   console.log("Type \"play\" to play the game, \"results\" to show the scoreboard, and \"exit\" to quit");  
   switch (input(">> ")) {
     case "play":
@@ -25,7 +26,7 @@ while (run) {
         
         const char = input("Input a letter >> ");
     
-        const msg = /^\w{2,}/.test(char) || !char.trim() ? "Please, input a single letter."  
+        msg = /^\w{2,}/.test(char) || !char.trim() ? "Please, input a single letter."  
           : "".concat(guessedLetters, triedLetters).includes(char) ? "You've already guessed this letter."
           : /[^a-z]/.test(char) ? "Please, enter a lowercase letter from the English alphabet"
           : !word.includes(char) ? wrongMsg : null
@@ -33,14 +34,14 @@ while (run) {
         msg ? console.log(msg) : guessedLetters += char; msg === wrongMsg && wrongTry(char);
       }
 
-      attempts ? wins++ : fails++; 
-      console.log(`\n${res[+!!attempts].format(word)}`); break;
+      attempts ? wins++ : fails++; msg = `\n${res[+!!attempts].format(word)}`; break;
       
     case "results":
-      console.log(`\nYou won: ${wins} times.\nYou lost: ${fails} times.\n`); break;
+      msg = `\nYou won: ${wins} times.\nYou lost: ${fails} times.\n`; break;
     case "exit":
       run = false; break;
     default:
-      console.log("unknown command try again...\n");
+      msg = "unknown command try again...\n";
   }
+  console.log(msg);
 }
